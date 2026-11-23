@@ -79,10 +79,10 @@ public:
 		delete[] co;
 	}
     bai_xe operator = (const bai_xe& a) {
-		for (int i = 0; i < max_xe; ++i) {
-			this->co[i] = a.co[i];
-			this->phuong_tiens[i] = a.phuong_tiens[i];
-		}
+        for (int i = 0; i < max_xe; ++i) {
+            this->co[i] = a.co[i];
+            this->phuong_tiens[i] = a.phuong_tiens[i];
+        }
     }
 };
 
@@ -99,30 +99,19 @@ suc_chua(kt == 'S' ? 1 : kt == 'M' ? 2 : 3), phuong_tiens(new phuong_tien*[suc_c
 int bai_xe::lay_ma() const { return ma_bai; }
 
 bool bai_xe::xoa(int ma_xe) {
-	for (int i = 0; i < suc_chua; ++i) {
-		if (co[i] && phuong_tiens[i]->lay_ma_xe() == ma_xe) {
-			delete phuong_tiens[i];
-			phuong_tiens[i] = nullptr;
-			co[i] = false;
-			so_xe_hien_tai--;
-			return true;
-		}
-	}
-
     for (int i = 0; i < suc_chua; ++i) {
 		if (co[i] && phuong_tiens[i]->lay_ma_xe() == ma_xe) {
-			for (int j = i + 1; j < suc_chua; ++j) {
-				if (co[j]) {
-					phuong_tiens[i] = phuong_tiens[j];
-					co[i] = true;
-					phuong_tiens[j] = nullptr;
-					co[j] = false;
-                    so_xe_hien_tai--;
-                    return true;
-				}
-			}
+			delete phuong_tiens[i];
+            for (int j = i; j < suc_chua - 1; ++j) {
+                phuong_tiens[j] = phuong_tiens[j + 1];
+                co[j] = co[j + 1];
+            }
+            phuong_tiens[so_xe_hien_tai - 1] = nullptr;
+            so_xe_hien_tai--;
+            return true;
 		}
     }
+
 
     return false;
 }
@@ -183,7 +172,7 @@ bool bai_xe::them_xe_vao(const phuong_tien& v) {
 		}
 	}
     so_xe_hien_tai = suc_chua;
-	doi_kich_thuoc(suc_chua * 1);
+	doi_kich_thuoc(suc_chua * 2);
     for (int i = 0; i < suc_chua; ++i) {
         if (!co[i]) {
             phuong_tiens[i] = new phuong_tien(v);
@@ -228,11 +217,11 @@ void bai_xe::doi_kich_thuoc(int suc_chua_moi) {
 
 class SystemInterface {
 private:
-	static const int max_bai = 10;
-    bai_xe bai1, bai2, bai3 , bai4, bai5, bai6, bai7, bai8, bai9, bai10;// sau này dùng mảng
-	bai_xe bai_xes[max_bai] = { bai1 , bai2 , bai3 , bai4 , bai5 , bai6 , bai7 , bai8 , bai9 , bai10 };
-    bool co1, co2, co3 , co4, co5, co6, co7, co8, co9, co10;
-	bool co[max_bai] = { co1 , co2 , co3 , co4 , co5 , co6 , co7 , co8 , co9 , co10 };
+    int suc_chua_bai;
+    bool* co;
+	bai_xe **bai_xes;
+
+   
 	int so_bai_hien_tai;
 
 public:
@@ -241,22 +230,34 @@ public:
 	bool ton_tai_xe(int ma) const;
 	int sinh_id() const;
     void runMenu();
+	void thay_doi_kich_thuoc_bai(int suc_chua_moi);
+	~SystemInterface() {
+		for (int i = 0; i < suc_chua_bai; ++i) {
+			delete bai_xes[i];
+		}
+		delete[] bai_xes;
+		delete[] co;
+	}
 };
 
-SystemInterface::SystemInterface() : so_bai_hien_tai(0), co1(false), co2(false), co3(false)
-, co4(false), co5(false), co6(false), co7(false), co8(false), co9(false), co10(false) {}
+SystemInterface::SystemInterface() : suc_chua_bai(5), so_bai_hien_tai(0), co(new bool[suc_chua_bai]), bai_xes(new bai_xe*[suc_chua_bai]) {
+    for (int i = 0; i < suc_chua_bai; ++i) {
+        co[i] = false;
+		bai_xes[i] = nullptr;
+    }
+}
 
 bool SystemInterface::ton_tai_bai(int ma) const {
-	for (int i = 0; i < max_bai; ++i) {
-		if (co[i] && bai_xes[i].lay_ma() == ma) {
+	for (int i = 0; i < suc_chua_bai; ++i) {
+		if (co[i] && bai_xes[i]->lay_ma() == ma) {
 			return true;
 		}
 	}
 	return false;
 }
 bool SystemInterface::ton_tai_xe(int ma) const {
-	for (int i = 0; i < max_bai; ++i) {
-		if (co[i] && bai_xes[i].tim_chi_so_xe(ma) != -1) {
+	for (int i = 0; i < suc_chua_bai; ++i) {
+		if (co[i] && bai_xes[i]->tim_chi_so_xe(ma) != -1) {
 			return true;
 		}
 	}
@@ -273,6 +274,18 @@ int SystemInterface::sinh_id() const {
         }
     }
     return ma;
+}
+
+void SystemInterface::thay_doi_kich_thuoc_bai(int suc_chua_moi) {
+	bai_xe** bai_xes_moi = new bai_xe * [suc_chua_moi];
+	bool* co_moi = new bool[suc_chua_moi];
+    for (int i = 0; i < suc_chua_bai; i++) {
+        bai_xes_moi[i] = bai_xes[i];    
+		co_moi[i] = co[i];
+		delete bai_xes[i];
+    }
+	bai_xes = bai_xes_moi;
+	co = co_moi;
 }
 
 void SystemInterface::runMenu() {
@@ -293,20 +306,20 @@ void SystemInterface::runMenu() {
         //các e chuyển sang lệnh switch cho thầy
         switch (chon) {
             case 1: {
-				if (so_bai_hien_tai >= max_bai) {
-					cout << "Bai da day\n";
+                int ma; char kt;
+				if (so_bai_hien_tai >= suc_chua_bai) {
+					thay_doi_kich_thuoc_bai(suc_chua_bai * 2);
 					break;
 				}
-                int ma; char kt;
                 cout << "Ma bai: "; cin >> ma;
 				if (ton_tai_bai(ma)) {
 					cout << "Bai da ton tai\n";
 					ma = sinh_id();
 				}
                 cout << "Kich thuoc (S/M/L): "; cin >> kt;
-				for (int i = 0; i < max_bai; ++i) {
+				for (int i = 0; i < suc_chua_bai; ++i) {
 					if (!co[i]) {
-						bai_xes[i] = bai_xe(ma, kt);
+						bai_xes[i] = new bai_xe(ma, kt);
 						co[i] = true;
 						so_bai_hien_tai++;
 						cout << "Da tao bai " << ma << "\n";
@@ -327,10 +340,10 @@ void SystemInterface::runMenu() {
                 cout << "Thoi luong (1-23): "; cin >> tg;
                 phuong_tien v(ma, loai, gio, tg);
 
-				for (int i = 0; i < max_bai; ++i) {
+				for (int i = 0; i < suc_chua_bai; ++i) {
 					if (!co[i]) {
-						bai_xes[i].them(v);
-						cout << "Da them xe " << ma << " vao bai " << bai_xes[i].lay_ma() << "\n";
+						bai_xes[i]->them_xe_vao(v);
+						cout << "Da them xe " << ma << " vao bai " << bai_xes[i]->lay_ma() << "\n";
                         break;
 					}
 				}
@@ -340,7 +353,7 @@ void SystemInterface::runMenu() {
             case 3: {
                 int ma;
                 cout << "Ma bai can xoa: "; cin >> ma;
-				for (int i = 0; i < max_bai; ++i) {
+				for (int i = 0; i < suc_chua_bai; ++i) {
                     if (co[i] && bai_xes[i].lay_ma() == ma) {
 						for (int j = i; j < max_bai; ++j) {
 							bai_xes[j] = bai_xes[j + 1];
