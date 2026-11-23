@@ -354,8 +354,8 @@ void SystemInterface::runMenu() {
                 int ma;
                 cout << "Ma bai can xoa: "; cin >> ma;
 				for (int i = 0; i < suc_chua_bai; ++i) {
-                    if (co[i] && bai_xes[i].lay_ma() == ma) {
-						for (int j = i; j < max_bai; ++j) {
+                    if (co[i] && bai_xes[i]->lay_ma() == ma) {
+						for (int j = i; j < suc_chua_bai; ++j) {
 							bai_xes[j] = bai_xes[j + 1];
 							co[j] = co[j + 1];
 						}
@@ -369,10 +369,10 @@ void SystemInterface::runMenu() {
             case 4: {
                 int ma;
                 cout << "Ma xe can lay ra: "; cin >> ma;
-                for (int i = 0; i < max_bai; ++i) {
+                for (int i = 0; i < suc_chua_bai; ++i) {
                     for (int j = 0; j < 3; ++j) {
-						if (bai_xes[i].phuong_tiens[j]->lay_ma_xe() == ma) {
-							bai_xes[i].xoa(ma);
+						if (bai_xes[i]->phuong_tiens[j]->lay_ma_xe() == ma) {
+							bai_xes[i]->xoa(ma);
 							cout << "Da lay xe ra\n";
 							break;
 						}
@@ -384,7 +384,7 @@ void SystemInterface::runMenu() {
             case 5: {
 				for (int i = 0; i < so_bai_hien_tai; ++i) {
                     if (co[i]) {
-                        bai_xes[i].hien_thi();
+                        bai_xes[i]->hien_thi();
                     }
 				}
                 break;
@@ -392,9 +392,9 @@ void SystemInterface::runMenu() {
             case 6: {
                 int ma;
                 cout << "Ma bai: "; cin >> ma;
-				for (int i = 0; i < max_bai; ++i) {
-					if (co[i] && bai_xes[i].lay_ma() == ma) {
-						bai_xes[i].hien_thi();
+				for (int i = 0; i < suc_chua_bai; ++i) {
+					if (co[i] && bai_xes[i]->lay_ma() == ma) {
+						bai_xes[i]->hien_thi();
 						break;
 					}
 				}
@@ -405,9 +405,9 @@ void SystemInterface::runMenu() {
                 string loai;
                 cout << "Loai xe: "; cin >> loai;
                 int dem; double tong;
-				for (int i = 0; i < max_bai; ++i) {
-					if (co[i] && bai_xes[i].co_loai(loai, dem, tong)) {
-						bai_xes[i].hien_thi();
+				for (int i = 0; i < suc_chua_bai; ++i) {
+					if (co[i] && bai_xes[i]->co_loai(loai, dem, tong)) {
+						bai_xes[i]->hien_thi();
 					}
 				}
                 break;
@@ -417,10 +417,10 @@ void SystemInterface::runMenu() {
 
                 for (int i = 0; i < 3; ++i) {
 					int dem = 0; double tong = 0;
-                    for (int j = 0; j < max_bai; ++j) {
+                    for (int j = 0; j < suc_chua_bai; ++j) {
                         if(co[j]){
                             int d, double s;
-							bai_xes[j].co_loai(loai_arr[i], d, s);
+							bai_xes[j]->co_loai(loai_arr[i], d, s);
                             dem += d; tong += s;
                         }
                     }
